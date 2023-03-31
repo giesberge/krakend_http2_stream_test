@@ -1,0 +1,31 @@
+version: "3"
+services:
+   
+  krakend_ce:
+    image: devopsfaith/krakend:watch
+    volumes:
+      - ./krakend:/etc/krakend
+    ports:
+      - "1234:1234"
+      - "8080:8080"
+      - "8090:8090"
+    command:
+      "run --config /etc/krakend/krakend.json"
+  
+  backend:
+    build: 
+      context: ./server
+      dockerfile: Dockerfile
+
+    restart: always
+    ports:
+      - "8081:8080"
+
+  frontend:
+    image: halverneus/static-file-server:latest
+    environment:
+      - FOLDER=/content
+    ports:
+      - "9000:8080"
+    volumes:
+      - ./client:/content

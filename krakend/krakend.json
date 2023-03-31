@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.krakend.io/schema/v3.json",
+  "version": 3,
+  "name": "KrakenD - API Gateway",
+  "timeout": "3000ms",
+  "cache_ttl": "300s",
+  "allow_insecure_connections": true,
+  "tls": {
+    "public_key": "/etc/krakend/cert.pem",
+    "private_key": "/etc/krakend/key.pem"
+  },
+  "extra_config": {
+    "security/cors": {
+      "allow_origins": [
+        "*"
+      ],
+      "allow_methods": [
+        "GET",
+        "HEAD",
+        "POST"
+      ],
+      "expose_headers": [
+        "Content-Length",
+        "Content-Type"
+      ],
+      "allow_headers": [
+        "Accept-Language"
+      ],
+      "max_age": "12h",
+      "allow_credentials": false,
+      "debug": false
+    },
+    "telemetry/logging": {
+      "level": "INFO",
+      "prefix": "[KRAKEND]",
+      "syslog": true,
+      "stdout": true,
+      "format": "custom",
+      "custom_format": "%{message}"
+    }
+  },
+  "output_encoding": "json",
+  "endpoints": [
+      {
+        "endpoint": "/receive",
+        "method": "GET",
+        "output_encoding": "string",
+        "timeout": "15m",
+        "backend": [
+          {
+            "url_pattern": "/receive",
+            "sd": "static",
+            "method": "GET",
+            "encoding": "no-op",
+            "host": [
+              "https://backend:8080"
+            ],
+            "disable_host_sanitize": true
+          }
+        ],
+        "input_query_strings": [
+          "channel"
+        ]
+      },
+      {
+        "endpoint": "/send",
+        "method": "POST",
+        "output_encoding": "negotiate",
+        "backend": [
+          {
+            "url_pattern": "/send",
+            "sd": "static",
+            "method": "POST",
+            "encoding": "no-op",
+            "host": [
+              "https://backend:8080"
+            ],
+            "disable_host_sanitize": true
+          }
+        ],
+        "input_query_strings": [
+          "channel"
+        ]
+      }
+  ]
+}
